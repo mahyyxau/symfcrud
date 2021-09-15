@@ -2,9 +2,12 @@
     namespace App\Controller;
 
     use App\Entity\Book;
+    use App\Entity\Category;
+    use App\Entity\Author;
 
     use Symfony\Component\HttpFoundation\Response;
     use Symfony\Component\HttpFoundation\Request;
+    use Symfony\Component\HttpFoundation\RedirectResponse;
     use Symfony\Component\Routing\Annotation\Route;
 
     use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -12,6 +15,13 @@
 
     use Symfony\Component\Form\Extension\Core\Type\TextType;
     use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+    use Symfony\Component\Form\Extension\Core\Type\DateType;
+    use Symfony\Component\Form\Extension\Core\Type\NumberType;
+    use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+    use App\Form\Type\DatalistType;
+    use Symfony\Component\Validator\Constraints as Assert;
 
     class BookController extends Controller {
         /**
@@ -19,10 +29,15 @@
          * @Method({"GET"})
          */ 
         public function index(){
-            // return new Response('<html><body>Mai</body></html>');
             $books = $this->getDoctrine()->getRepository(Book::class)->findAll();
+            $categories = $this->getDoctrine()->getRepository(Category::class)->findAll();
+            $authors = $this->getDoctrine()->getRepository(Author::class)->findAll();
 
-            return $this->render('books/index.html.twig', ['books' => $books]);
+            return $this->render('books/index.html.twig', [
+                'books' => $books,
+                'categories' => $categories,
+                'authors' => $authors,
+            ]);
         }
 
         /**
@@ -33,15 +48,45 @@
             $book = new Book();
             
             $form = $this->createFormBuilder($book)->add('title', TextType::class, ['label'=>'Номын нэр', 'attr'=>['class'=>'form-control']])
-                    ->add('author', TextType::class, ['label'=>'Зохиолч', 'required' => false, 'attr' => ['class' => 'form-control']])
+                    ->add('author', EntityType::class, ['label'=>'Зохиолч', 'class' => 'App\Entity\Author', 'attr'=>['class'=>'form-control']])
+                    // ->add('category', EntityType::class, ['class' => 'App\Entity\Category'])
+                    ->add('category', DatalistType::class, [
+                        'label' => 'Төрөл',
+                        'class' => 'App\Entity\Category',
+                        'attr'=>['class'=>'form-control']
+                    ])
+                    ->add('publishedat', DateType::class, [
+                        'label'=>'Хэвлэсэн огноо',
+                        'widget' => 'single_text',
+                        'format' => 'yyyy-MM-dd',
+                        'attr'=>['class'=>'form-control']
+                    ])
+                    ->add('price', NumberType::class, ['label'=>'Үнэ', 'attr'=>['class'=>'form-control']])
                     ->add('save', SubmitType::class, ['label'=>'Бүртгэх','attr'=>['class'=>'btn btn-primary']])->getForm();
 
             $form ->handleRequest($request);
-
-            if($form->isSubmitted() && $form->isValid()){
-                $book = $form->getData();
+            
+            if($form->isSubmitted()){
 
                 $entityManager = $this->getDoctrine()->getManager();
+    
+                $category = $this->getDoctrine()->getRepository(Category::class)->findBy([
+                    'name' => $request->request->get('form')['category']
+                ]);
+    
+                if(!$category){
+                    $category = new Category();
+                    $category->setName($request->request->get('form')['category']);
+                    $entityManager->persist($category);
+                    $entityManager->flush();
+                    $id = $category->getId();
+                }else{
+                    $id = $category[0]->getId();
+                }
+
+                $book = $form->getData();
+                $book->setCategory($this->getDoctrine()->getRepository(Category::class)->find($id));
+
                 $entityManager->persist($book);
                 $entityManager->flush();
 
@@ -85,12 +130,43 @@
             $book = $this->getDoctrine()->getRepository(Book::class)->find($id);
             
             $form = $this->createFormBuilder($book)->add('title', TextType::class, ['label'=>'Номын нэр','attr'=>['class'=>'form-control']])
-                    ->add('author', TextType::class, ['label'=>'Зохиолч','required' => false, 'attr' => ['class' => 'form-control']])
+                    ->add('author', EntityType::class, ['label'=>'Зохиолч', 'class' => 'App\Entity\Author', 'attr'=>['class'=>'form-control']])
+                    ->add('category', EntityType::class, ['class' => 'App\Entity\Category', 'attr'=>['class'=>'form-control']])
+                    // ->add('category', DatalistType::class, [
+                    //     'label' => 'Төрөл',
+                    //     'class' => 'App\Entity\Category',
+                    //     'choice_label' => function ($category) {
+                    //         return $category->getName();
+                    //     }
+                    // ])
+                    ->add('publishedat', DateType::class, [
+                        'label'=>'Хэвлэсэн огноо',
+                        'widget' => 'single_text',
+                        'format' => 'yyyy-MM-dd',
+                        'attr'=>['class'=>'form-control']
+                    ])
+                    ->add('price', NumberType::class, ['label'=>'Үнэ', 'attr'=>['class'=>'form-control']])
                     ->add('save', SubmitType::class, ['label'=>'Засах','attr'=>['class'=>'btn btn-primary']])->getForm();
 
-            $form ->handleRequest($request);
+            $form->handleRequest($request);
 
             if($form->isSubmitted() && $form->isValid()){
+
+                // $category = $this->getDoctrine()->getRepository(Category::class)->findBy([
+                //     'name' => $request->request->get('form')['category']
+                // ]);
+    
+                // if(!$category){
+                //     $category = new Category();
+                //     $category->setName($request->request->get('form')['category']);
+                //     $entityManager->persist($category);
+                //     $entityManager->flush();
+                //     $id = $category->getId();
+                // }else{
+                //     $id = $category[0]->getId();
+                // }
+
+                // $book->setCategory($this->getDoctrine()->getRepository(Category::class)->find($id));
 
                 $entityManager = $this->getDoctrine()->getManager();
                 $entityManager->flush();
@@ -101,6 +177,11 @@
             return $this->render('books/update.html.twig', ['form'=>$form->createView(),'id'=>$id]);
         }
 
+        public function configureOptions(OptionsResolver $resolver) {
+            $resolver->setDefaults([
+                'data_class' => Computer::class,
+            ]);
+        }
         /**
          * @Route("/book/save")
          */

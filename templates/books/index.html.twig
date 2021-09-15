@@ -7,6 +7,8 @@
             <thead>
                 <tr>
                     <th id="poo">Номын нэр</th>
+                    <th id="poo">Төрөл</th>
+                    <th id="poo">Зохиолч</th>
                     <th>Үйлдэл</th>
                 </tr>
             </thead>
@@ -14,6 +16,8 @@
                 {% for book in books %}
                     <tr>
                         <td>{{ book.title }}</td>
+                        <td>{{ book.category }}</td>
+                        <td>{{ book.author }}</td>
                         <td>
                             <a href="/book/{{ book.id }}" class="btn btn-light">Харах</a>
                             <a href="/book/update/{{ book.id }}" class="btn btn-dark">Засах</a>
@@ -24,7 +28,55 @@
             </tbody>
         </table>
     {% else %}
-        <p>Өгөгдөл байхгүй</p>
+        <p>Номын жагсаалт хоосон байна</p>
+    {% endif %}
+
+    {% if categories %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th id="poo">Төрлийн нэр</th>
+                    <th id="poo">Үйлдэл</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>
+                            <a href="/categories/update/{{ category.id }}" class="btn btn-dark">Засах</a>
+                            <a href="#" class="btn btn-danger" onclick="deleteCategory({{ category.id }})">Устгах</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Төрлийн жагсаалт хоосон байна</p>
+    {% endif %}
+
+    {% if authors %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th id="poo">Зохиолч</th>
+                    <th id="poo">Үйлдэл</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for author in authors %}
+                    <tr>
+                        <td>{{ author.name }}</td>
+                        <td>
+                            <a href="/authors/update/{{ author.id }}" class="btn btn-dark">Засах</a>
+                            <a href="#" class="btn btn-danger" onclick="deleteAuthor({{ author.id }})">Устгах</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Жагсаалт хоосон байна</p>
     {% endif %}
 {% endblock %}
 
