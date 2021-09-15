@@ -3,6 +3,26 @@
 {% block title %} Засах {% endblock %}
 {% block body %}
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+        <div class="my-custom-class-for-errors">
+        {{ form_errors(form) }}
+    </div>
+
+    <div class="row">
+        {{ form_row(form.title) }}
+    </div>
+    <div class="row">
+        {{ form_row(form.author) }}
+    </div>
+    <div class="row">
+        {{ form_row(form.category) }}
+    </div>
+    <div class="row">
+        <div class="col">
+            {{ form_row(form.price) }}
+        </div>
+        <div class="col" id="some-custom-id">
+            {{ form_row(form.publishedat) }}
+        </div>
+    </div>
     {{ form_end(form) }}
 {% endblock %}

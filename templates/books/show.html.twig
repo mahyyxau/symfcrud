@@ -1,9 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ book.title }} засах{% endblock %}
+{% block title %}{{ book.title }}{% endblock %}
 {% block body %}
     <h1>{{ book.title }}</h1>
-    <p>{{ book.author }}</p>
+    <h3><i>Төрөл: {{ book.category }}</i></h3>
+    <p>Зохиолч: {{ book.author }}</p>
+    <p>Үнэ: {{ book.price|price }}</p>
+    <p>Хэвлэсэн огноо: {{ book.publishedat|date_form }}</p>
     <hr>
     <a href="/">Буцах</a>
 {% endblock %}
