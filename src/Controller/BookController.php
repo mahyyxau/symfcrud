@@ -18,6 +18,7 @@
     use Symfony\Component\Form\Extension\Core\Type\DateType;
     use Symfony\Component\Form\Extension\Core\Type\NumberType;
     use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+    use Symfony\Component\Form\CallbackTransformer;
 
     use Symfony\Component\OptionsResolver\OptionsResolver;
     use App\Form\Type\DatalistType;
@@ -96,6 +97,25 @@
             return $this->render('books/new.html.twig', ['form'=>$form->createView()]);
         }
 
+        /**
+         * @Route("/book/search")
+         * Method({"GET","POST"})
+         */
+        public function searchAction(Request $request){
+            $data =$request->request->all();
+     
+            $em = $this->getDoctrine()->getManager();
+            $query = $em->createQuery(
+                    'SELECT b FROM App\Entity\Book b 
+                        LEFT JOIN b.category c
+                        LEFT JOIN b.author a 
+                    WHERE b.title LIKE :data OR c.name LIKE :data OR a.name LIKE :data')
+            ->setParameter('data','%'.$data['searchTxt'].'%');
+     
+            $res = $query->getResult();
+         
+            return $this->render('books/searchResult.html.twig', ['res' => $res]);
+        }
         
         /**
          * @Route("/book/{id}")
@@ -134,11 +154,27 @@
                     ->add('category', EntityType::class, ['class' => 'App\Entity\Category', 'attr'=>['class'=>'form-control']])
                     // ->add('category', DatalistType::class, [
                     //     'label' => 'Төрөл',
+                    //     'required'   =>  false,
                     //     'class' => 'App\Entity\Category',
                     //     'choice_label' => function ($category) {
                     //         return $category->getName();
                     //     }
                     // ])
+                    // ->addModelTransformer(new CallbackTransformer(
+                        // string to null
+                        // function ($NumToNull) {
+                            
+                        //     if(is_numeric($NumToNull->getCategory())){
+                        //         return "";
+                        //     }
+                        // },
+                        // function ($NulltoNum) {
+                        //     // transform the string back to an array
+                        //     if(is_string($stringToNull->getCategory())){
+                        //         return "";
+                        //     }
+                        // }
+                    // ))
                     ->add('publishedat', DateType::class, [
                         'label'=>'Хэвлэсэн огноо',
                         'widget' => 'single_text',
@@ -177,11 +213,6 @@
             return $this->render('books/update.html.twig', ['form'=>$form->createView(),'id'=>$id]);
         }
 
-        public function configureOptions(OptionsResolver $resolver) {
-            $resolver->setDefaults([
-                'data_class' => Computer::class,
-            ]);
-        }
         /**
          * @Route("/book/save")
          */

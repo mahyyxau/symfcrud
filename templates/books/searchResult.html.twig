@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}crud{% endblock %}
+{% block body %}
+    {% if res %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th id="poo">Номын нэр</th>
+                    <th id="poo">Төрөл</th>
+                    <th id="poo">Зохиолч</th>
+                    <th>Үйлдэл</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in res %}
+                    <tr>
+                        <td>{{ r.title }}</td>
+                        <td>{{ r.category }}</td>
+                        <td>{{ r.author }}</td>
+                        <td>
+                            <a href="/book/{{ r.id }}" class="btn btn-light">Харах</a>
+                            <a href="/book/update/{{ r.id }}" class="btn btn-dark">Засах</a>
+                            <a href="#" class="btn btn-danger" onclick="deleteBook({{ r.id }})">Устгах</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Таарах илэрц байхгүй байна</p>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {# <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> #}
+    <script src="/js/main.js"></script>
+{% endblock %}
