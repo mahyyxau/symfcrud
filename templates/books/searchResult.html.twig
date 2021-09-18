@@ -6,10 +6,11 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th id="poo">Номын нэр</th>
-                    <th id="poo">Төрөл</th>
-                    <th id="poo">Зохиолч</th>
-                    <th>Үйлдэл</th>
+                    <th>Номын нэр</th>
+                    <th>Төрөл</th>
+                    <th>Зохиолч</th>
+                    <th>Үнэ</th>
+                    <th>Хэвлэсэн огноо</th>
                 </tr>
             </thead>
             <tbody>
@@ -18,11 +19,8 @@
                         <td>{{ r.title }}</td>
                         <td>{{ r.category }}</td>
                         <td>{{ r.author }}</td>
-                        <td>
-                            <a href="/book/{{ r.id }}" class="btn btn-light">Харах</a>
-                            <a href="/book/update/{{ r.id }}" class="btn btn-dark">Засах</a>
-                            <a href="#" class="btn btn-danger" onclick="deleteBook({{ r.id }})">Устгах</a>
-                        </td>
+                        <td>{{ r.price|price }}</td>
+                        <td>{{ r.publishedat|date_form }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
